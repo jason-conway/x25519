@@ -1,0 +1,4 @@
+.DS_Store
+.vscode
+key_exchange.*
+!key_exchange.c
