@@ -9,10 +9,10 @@
  * @ref https://martin.kleppmann.com/papers/curve25519.pdf
  * @ref https://cr.yp.to/ecdh.html
  * @ref https://cr.yp.to/ecdh/curve25519-20060209.pdf
- * @version 2.5519
+ * @version 0.9.2
  * @date 2022-02-01
  *
- * @copyright SPDX-License-Identifier: MIT
+ * @copyright Copyright (c) 2022 Jason Conway. All rights reserved.
  *
  */
 
@@ -67,7 +67,7 @@ static inline void square(field_t *dest, const field_t *src)
 
 // a^2i = a^i· a^i and a^2i+1 = a·a^i· ai
 // Compute a^i recursively, and then square a^i to obtain a^2i
-// If the exponent is odd, multiply the result with another copy of a to obtain a^2i+1
+// If the exponent is odd, we additionally multiply the result with another copy of a to obtain a^2i+1
 static inline void multiplicative_inverse(field_t *dest, const field_t *src)
 {
 	field_t elements;
@@ -112,7 +112,7 @@ static inline void pack(uint8_t *dest, const field_t *src)
 	field_t elements;
 	memcpy(&elements, src, 128);
 
-	// Getting all elements in [0, 65535] takes three calls
+	// Ensure all elements are in [0, 2^16 − 1]
 	carry_reduce(&elements);
 	carry_reduce(&elements);
 	carry_reduce(&elements);
