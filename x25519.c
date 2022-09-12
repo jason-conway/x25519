@@ -19,8 +19,7 @@
 #include "x25519.h"
 
 // Galois field working type
-typedef union field_t
-{
+typedef union field_t {
 	int64_t q[16];
 } field_t;
 
@@ -68,12 +67,12 @@ static inline void square(field_t *dest, const field_t *src)
 // a^2i = a^i· a^i and a^2i+1 = a·a^i· ai
 // Compute a^i recursively, and then square a^i to obtain a^2i
 // If the exponent is odd, we additionally multiply the result with another copy of a to obtain a^2i+1
-static inline void multiplicative_inverse(field_t *dest, const field_t *src)
+static inline void inverse(field_t *dest, const field_t *src)
 {
 	field_t elements;
 	memcpy(&elements, src, 128); // Initialize with src allows starting at bit 253
 
-	for (ssize_t a = 0xfd; a >= 0; a--) {
+	for (int64_t a = 0xfd; a >= 0; a--) {
 		square(&elements, &elements);
 		if (a != 2 && a != 4) {
 			multiply(&elements, &elements, src);
@@ -170,7 +169,7 @@ void x25519(uint8_t *public, const uint8_t *secret, const uint8_t *basepoint)
 	static const field_t c1db41 = { .q = { 0xdb41, 1 } }; // 121665
 
 	// Infamous Montgomery ladder
-	for (ssize_t i = 0xfe; i >= 0; i--) {
+	for (int64_t i = 0xfe; i >= 0; i--) {
 		const uint8_t bit = (private_key[i >> 0x03] >> (i & 0x07)) & 0x01; // Clamp
 
 		// Swap the values in [0] with [1] and [2] with [3] when bit == 1
@@ -272,8 +271,8 @@ void x25519(uint8_t *public, const uint8_t *secret, const uint8_t *basepoint)
 	memcpy(&x[0x30], &inputs[1], 128);
 	memcpy(&x[0x40], &inputs[3], 128);
 
-	multiplicative_inverse((field_t *)&x[0x20],
-						   (field_t *)&x[0x20]);
+	inverse((field_t *)&x[0x20],
+			(field_t *)&x[0x20]);
 
 	multiply((field_t *)&x[0x10],
 			 (field_t *)&x[0x10],

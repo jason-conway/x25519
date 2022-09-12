@@ -14,4 +14,4 @@ which you can use to build functions for deriving public and shared keys.
 
 # Sample Usage:
 
-See [ecdhke.h](ecdhke.h) for a full example.
+See [key_exchange.c](key_exchange.c) for a full example.

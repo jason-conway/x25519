@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 #include <inttypes.h>
-#include <stdlib.h>
+
 #include "x25519.h"
 
 void xgetrandom(void *dest, size_t len)
@@ -65,7 +65,7 @@ static void print_key(const char *str, const uint8_t *key)
 						  ((uint64_t)key[i + 3] << 0x00));
 		printf("%s%" PRIx64, i ? "-" : "", chunk);
 	}
-	printf("\n");
+	puts("\n");
 }
 
 int main(void)
