@@ -9,7 +9,7 @@
  * @ref https://martin.kleppmann.com/papers/curve25519.pdf
  * @ref https://cr.yp.to/ecdh.html
  * @ref https://cr.yp.to/ecdh/curve25519-20060209.pdf
- * @version 0.9.2
+ * @version 0.9.3
  * @date 2022-02-01
  *
  * @copyright Copyright (c) 2022 Jason Conway. All rights reserved.
@@ -27,17 +27,15 @@ typedef union field_t {
 // u7/2^179, u8/2^204, u9/2^230 all in {−2^25, −2^25 + 1, ..., −1, 0, 1, ..., 2^25 − 1, 2^25}
 static inline void carry_reduce(field_t *dest)
 {
-	for (size_t i = 0; i < 16; i++) {
+	for (size_t i = 0;; i++) {
 		// Subtract the top 48 bits from each element to yield [0, 2^16 - 1]
 		int64_t carry = dest->q[i] >> 16;
-		dest->q[i] -= (uint64_t)carry << 16; // Shift without the cast to uint64_t is undefined
-
-		if (i < 15) {
-			dest->q[i + 1] += carry;
+		dest->q[i + 0] -= (uint64_t)carry << 16;  // Shift without the cast to uint64_t is undefined
+		if (i == 15) {
+			dest->q[0] += 38 * carry;  // Reduction modulo 2p
+			break;
 		}
-		else {
-			dest->q[0] += 38 * carry; // Reduction modulo 2p
-		}
+		dest->q[i + 1] += carry;
 	}
 }
 
@@ -72,9 +70,9 @@ static inline void inverse(field_t *dest, const field_t *src)
 	field_t elements;
 	memcpy(&elements, src, 128); // Initialize with src allows starting at bit 253
 
-	for (int64_t a = 0xfd; a >= 0; a--) {
+	for (size_t i = 0; i < 0xfe; i++) {
 		square(&elements, &elements);
-		if (a != 2 && a != 4) {
+		if (i != 0xfb && i != 0xf9) {
 			multiply(&elements, &elements, src);
 		}
 	}

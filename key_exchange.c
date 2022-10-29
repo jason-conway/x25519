@@ -11,6 +11,11 @@
 #include <stdio.h>
 #include <inttypes.h>
 
+#if _WIN32
+  #include <windows.h>
+  #include <ntsecapi.h>
+#endif
+
 #include "x25519.h"
 
 void xgetrandom(void *dest, size_t len)
@@ -25,8 +30,6 @@ void xgetrandom(void *dest, size_t len)
 	}
 	(void)fclose(random);
 #elif _WIN32
-#include <windows.h>
-#include <ntsecapi.h>
 	if (!RtlGenRandom(dest, len)) {
 		exit(-1);
 	}
